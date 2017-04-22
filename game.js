@@ -25,7 +25,9 @@ window.onload = function() {
         genMap(map,mapBuffer/2,mapBuffer/2,mapWidth,mapHeight);
         fixRooms(map,mapWidth,mapHeight);
 
-        game.cache.addTilemap('dynamicMap', null, mapToCsv(map,mapWidth+mapBuffer,mapHeight+mapBuffer), Phaser.Tilemap.CSV);
+        mapWidth += mapBuffer;
+        mapHeight += mapBuffer;
+        game.cache.addTilemap('dynamicMap', null, mapToCsv(map,mapWidth,mapHeight), Phaser.Tilemap.CSV);
         tilemap = game.add.tilemap('dynamicMap', tileWidth, tileWidth);
 
         tilemap.addTilesetImage('tiles', 'tiles', tileWidth, tileWidth);
@@ -120,6 +122,7 @@ window.onload = function() {
     }
 
     function handleInteraction(pos,dir){
+        unVisit(map,mapWidth,mapHeight);
         if(map[pos.y][pos.x].tile === '2'){
             map[pos.y][pos.x].tile = '0';
             map[pos.y][pos.x].navigable = true;
@@ -127,11 +130,15 @@ window.onload = function() {
             var afterDoor = getInDir(pos,dir);
             if(getMapTile(afterDoor).tile === '0'){
                 processRoom(afterDoor);
+                getMapTile(afterDoor).opened = true;
             }
         }
     }
 
     function processRoom(pos){
+        if(!hasRoomBeenOpened(map,pos)){
+            console.log('new room');
+        }
         console.log('openedRoom');
     }
 

@@ -322,3 +322,23 @@ function surroundingTileTypes(map,pos){
 
     return res;
 }
+
+function hasRoomBeenOpened(map,pos){
+    var roomTiles = determineRoom(map,pos);
+
+    while(roomTiles.length>0){
+        var rt = roomTiles.pop();
+        if(getMapTileFromMap(map,rt).opened) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function unVisit(map,width,height){
+    for (var y = 0; y < height; y++) {
+        for (var x = 0; x < width; x++) {
+            getMapTileFromMap(map,{x:x,y:y}).visited = false;
+        }
+    }
+}
