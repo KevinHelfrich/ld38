@@ -6,12 +6,17 @@ window.onload = function() {
     var guyPos = {};
     var player = {
         health: 100,
-        maxHealth: 100
+        maxHealth: 100,
+        weapon: {
+            name: 'dagger',
+            damage: 10
+        }
     };
     var keydownTracker = {};
     var tilemap = {};
     var layer = {};
     var enemies = [];
+    var items = [];
 
     var actionMade = false;
 
@@ -23,12 +28,15 @@ window.onload = function() {
     var guyOffset = 20;
 
     var getEnemy = enemyGetter(game,tileWidth,guyOffset);
+    var getItem = itemGetter(game,tileWidth,guyOffset);
 
     function preload () {
         game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
         game.load.image('zombie', 'zombie.png');
         game.load.image('ded', 'ded.png');
+        game.load.image('dagger', 'dagger.png');
+        game.load.image('sword', 'sword.png');
     }
 
     function create () {
@@ -128,7 +136,6 @@ window.onload = function() {
         }
         getMapTile(guyPos).navigable = false;
 
-        //reset key click trackers
         if (cursors.left.isUp)
         {
             keydownTracker.left = false;
@@ -245,11 +252,18 @@ window.onload = function() {
             kovm.enemyName('wall');
         }
         else if(tile.enemy){
-            tile.enemy.health -=35;
-            if(tile.enemy.health<0){
+            tile.enemy.health -= player.weapon.damage;
+            if(tile.enemy.health<1){
                 tile.enemy.health = 0;
                 tile.enemy.sprite.destroy(true);
                 tile.navigable = true;
+                if(getRandomInt(0,4)===1){
+                    if(getRandomInt(0,1)===1){
+                        items.push(getItem('dagger',tile.enemy.pos));
+                    } else{
+                        items.push(getItem('sword',tile.enemy.pos));
+                    }
+                }
             }
             kovm.enemyHealth(tile.enemy.health);
             kovm.enemyName(tile.enemy.name);
@@ -279,6 +293,26 @@ window.onload = function() {
     function setGuyPos(){
         guy.position.x = tileWidth*guyPos.x+guyOffset;
         guy.position.y = tileWidth*guyPos.y+guyOffset;
+
+        for(var i = 0;i < items.length; i++){
+            var item = items[i];
+
+            if(item.pos.x === guyPos.x && item.pos.y === guyPos.y){
+                var t = item.name;
+                var tt = item.damage;
+
+                item.name = player.weapon.name;
+                item.damage = player.weapon.damage;
+
+                item.sprite.destroy;
+                item.sprite = game.add.sprite(tileWidth*item.pos.x+guyOffset,tileWidth*item.pos.y+guyOffset,item.name);
+                item.sprite.anchor.setTo(0.5, 0.5);
+
+                player.weapon.name = t;
+                kovm.playerWeapon(t);
+                player.weapon.damage = tt;
+            }
+        }
     }
 
     function setPos(sprite,pos){

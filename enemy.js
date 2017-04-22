@@ -7,11 +7,12 @@ function enemyGetter(game,tileWidth,guyOffset){
             var enemy = {
                 sprite: enemySprite,
                 pos: enemyPos,
-                health: 100,
+                health: 40,
                 reaction: getRandomInt(0,3),
                 baseReaction: 3,
                 name: 'zombie',
-                damage: 10
+                damage: 10,
+                armour: 0
             };
             return enemy;
         }
