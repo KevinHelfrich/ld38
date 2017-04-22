@@ -12,19 +12,20 @@ window.onload = function() {
     var mapHeight = 128;
 
     var mapBuffer = 40;
-    var tileWidth = 4;
-    var guyOffset = 2;
+    var tileWidth = 40;
+    var guyOffset = 20;
 
     function preload () {
-        game.load.image('guy', 'guy2.png');
+        game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
     }
 
     function create () {
         map = initMap(mapWidth+mapBuffer,mapHeight+mapBuffer);
         genMap(map,mapBuffer/2,mapBuffer/2,mapWidth,mapHeight);
+        fixRooms(map,mapWidth,mapHeight);
 
-        game.cache.addTilemap('dynamicMap', null, mapToCsv(map,mapWidth,mapHeight), Phaser.Tilemap.CSV);
+        game.cache.addTilemap('dynamicMap', null, mapToCsv(map,mapWidth+mapBuffer,mapHeight+mapBuffer), Phaser.Tilemap.CSV);
         tilemap = game.add.tilemap('dynamicMap', tileWidth, tileWidth);
 
         tilemap.addTilesetImage('tiles', 'tiles', tileWidth, tileWidth);

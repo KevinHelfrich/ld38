@@ -226,3 +226,99 @@ function getInDir(pos,dir){
         return {x:pos.x,y:pos.y+1};
     }
 }
+
+function fixRooms(map,width,height){
+    var roomSquares = determineRoomSquares(map,width,height);
+
+    while(roomSquares.length > 0){
+        var rs = roomSquares.pop();
+
+        if(!getMapTileFromMap(map,rs).fixed){
+            fixRoom(map,rs);
+        }
+    }
+}
+
+function fixRoom(map,pos){
+    var roomInt = determineRoom(map,pos);
+    var doors = [];
+    var walls = [];
+    var left = pos.x;
+    var right = pos.x;
+    var top = pos.y;
+    var bottom = pos.y;
+
+    while(roomInt.length > 0){
+        var tile = roomInt.pop();
+        getMapTileFromMap(map,tile).fixed = true;
+
+        if(tile.x>right){right = tile.x;}
+        if(tile.x<left){left = tile.x;}
+        if(tile.y>bottom){bottom = tile.y;}
+        if(tile.y<top){top = tile.y;}
+
+        for(var i = 0;i<4;i++){
+            var lt = getMapTileFromMap(map,getInDir(tile,i));
+            if(lt.tile === '1'){
+                walls.push(getInDir(tile,i));
+            }
+            if(lt.tile === '2'){
+                doors.push(getInDir(tile,i));
+            }
+        }
+    }
+
+    while(walls.length > 0){
+        var wall = walls.pop();
+
+        var surrounders = surroundingTileTypes(map,wall);
+
+        if(surrounders[4] > 0 && surrounders[0] > 0){
+            getMapTileFromMap(map,wall).tile = '2';
+        }
+    }
+
+    while(doors.length>0){
+        var door = doors.pop();
+
+        var surrounders = surroundingTileTypes(map,door);
+        if(surrounders[4] === 0){
+            getMapTileFromMap(map,door).tile = '1';
+        }
+    }
+
+    var tls = surroundingTileTypes(map,{x:left-1,y:top-1});
+    if(tls[4]>0){
+        getMapTileFromMap(map,{x:left-1,y:top}).tile = '2';
+        getMapTileFromMap(map,{x:left-1,y:top-1}).tile = '2';
+    }
+    tls = surroundingTileTypes(map,{x:right+1,y:top-1});
+    if(tls[4]>0){
+        getMapTileFromMap(map,{x:right+1,y:top}).tile = '2';
+        getMapTileFromMap(map,{x:right+1,y:top-1}).tile = '2';
+    }
+    tls = surroundingTileTypes(map,{x:left-1,y:bottom+1});
+    if(tls[4]>0){
+        getMapTileFromMap(map,{x:left-1,y:bottom}).tile = '2';
+        getMapTileFromMap(map,{x:left-1,y:bottom+1}).tile = '2';
+    }
+    tls = surroundingTileTypes(map,{x:right+1,y:bottom+1});
+    if(tls[4]>0){
+        getMapTileFromMap(map,{x:right+1,y:bottom}).tile = '2';
+        getMapTileFromMap(map,{x:right+1,y:bottom+1}).tile = '2';
+    }
+}
+
+function getMapTileFromMap(map,pos){
+    return map[pos.y][pos.x];
+}
+
+function surroundingTileTypes(map,pos){
+    var res = { '0':0,'1':0,'2':0,'3':0,'4':0};
+
+    for(var i = 0;i<4;i++){
+        res[getMapTileFromMap(map,getInDir(pos,i)).tile]++;
+    }
+
+    return res;
+}
