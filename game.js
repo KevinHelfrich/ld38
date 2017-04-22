@@ -190,34 +190,7 @@ window.onload = function() {
             }
 
             getMapTile(enemy.pos).navigable = true;
-            var xDif = guyPos.x - enemy.pos.x;
-            var yDif = guyPos.y - enemy.pos.y;
-
-            if(Math.abs(xDif)>Math.abs(yDif)){
-                if(xDif<0){
-                    var newSpot = getInDir(enemy.pos,0);
-                    if(getMapTile(newSpot).navigable){
-                        enemy.pos = newSpot;
-                    }
-                } else{
-                    var newSpot = getInDir(enemy.pos,2);
-                    if(getMapTile(newSpot).navigable){
-                        enemy.pos = newSpot;
-                    }
-                }
-            } else {
-                if(yDif<0){
-                    var newSpot = getInDir(enemy.pos,1);
-                    if(getMapTile(newSpot).navigable){
-                        enemy.pos = newSpot;
-                    }
-                } else{
-                    var newSpot = getInDir(enemy.pos,3);
-                    if(getMapTile(newSpot).navigable){
-                        enemy.pos = newSpot;
-                    }
-                }
-            }
+            enemy.updateFxn(map,guyPos);
             getMapTile(enemy.pos).navigable = false;
             getMapTile(enemy.pos).enemy = enemy;
             setPos(enemy.sprite,enemy.pos);
@@ -304,9 +277,11 @@ window.onload = function() {
                 item.name = player.weapon.name;
                 item.damage = player.weapon.damage;
 
-                item.sprite.destroy;
+                item.sprite.destroy();
                 item.sprite = game.add.sprite(tileWidth*item.pos.x+guyOffset,tileWidth*item.pos.y+guyOffset,item.name);
                 item.sprite.anchor.setTo(0.5, 0.5);
+
+                game.world.swap(item.sprite,guy);
 
                 player.weapon.name = t;
                 kovm.playerWeapon(t);
@@ -318,6 +293,15 @@ window.onload = function() {
     function setPos(sprite,pos){
         sprite.position.x = tileWidth*pos.x+guyOffset;
         sprite.position.y = tileWidth*pos.y+guyOffset;
+        for(var i = 0;i < items.length; i++){
+            var item = items[i];
+
+            if(item.pos.x === pos.x && item.pos.y === pos.y){
+                if(item.sprite.z>sprite.z){
+                    game.world.swap(sprite,item.sprite);
+                }
+            }
+        }
     }
 
     function getMapTile(pos){
