@@ -230,6 +230,20 @@ window.onload = function() {
                 getMapTile(afterDoor).opened = true;
             }
         }
+        else if(getMapTile(pos).tile === '1'){
+            if(tile.health){
+                tile.health--;
+                if(tile.health<1){
+                    tilemap.fill(0, pos.x,pos.y,1,1);
+                    tile.navigable = true;
+                    tile.tile = '0';
+                }
+            } else {
+                tile.health = 10;
+            }
+            kovm.enemyHealth(tile.health);
+            kovm.enemyName('wall');
+        }
         else if(tile.enemy){
             tile.enemy.health -=35;
             if(tile.enemy.health<0){
