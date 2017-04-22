@@ -1,53 +1,41 @@
 window.onload = function() {
     var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
-    var map = '';
+    var map = [];
     var guy = {};
     var keydownTracker = {};
+    var tilemap = {};
+    var layer = {};
+
+    var mapWidth = 128;
+    var mapHeight = 128;
+
+    var mapBuffer = 40;
 
     function preload () {
-
-        game.load.image('floor', 'floor.png');
-        game.load.image('door', 'door.png');
-        game.load.image('wall', 'wall.png');
         game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
-
     }
 
     function create () {
-        for (var y = 0; y < 128; y++)
-        {
-            for (var x = 0; x < 128; x++)
-            {
-                //map += x===0||x===127||y===0||y===127 ? '1':'0';
-                map += x%2===0&&y%2===0 ? '1':'0';
+        map = initMap(mapWidth+mapBuffer,mapHeight+mapBuffer);
+        genMap(map,mapBuffer/2,mapBuffer/2,mapWidth,mapHeight);
 
-                if (x < 127)
-                {
-                    map += ',';
-                }
-            }
+        game.cache.addTilemap('dynamicMap', null, mapToCsv(map,mapWidth,mapHeight), Phaser.Tilemap.CSV);
+        tilemap = game.add.tilemap('dynamicMap', 4, 4);
 
-            if (y < 127)
-            {
-                map += "\n";
-            }
-        }
-        game.cache.addTilemap('dynamicMap', null, map, Phaser.Tilemap.CSV);
-        var tilemap = game.add.tilemap('dynamicMap', 40, 40);
 
-        //  'tiles' = cache image key, 16x16 = tile size
-        tilemap.addTilesetImage('tiles', 'tiles', 40, 40);
+        tilemap.addTilesetImage('tiles', 'tiles', 4, 4);
 
-        var layer = tilemap.createLayer(0);
+        layer = tilemap.createLayer(0);
+        //tilemap.scale = {x:0.1,y:0.1};
 
         layer.resizeWorld();
 
-        guy = game.add.sprite(60, 60, 'guy');
+        guy = game.add.sprite(-60, 60, 'guy');
         guy.anchor.setTo(0.5, 0.5);
 
-        game.camera.follow(guy);
+        //game.camera.follow(guy);
 
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
