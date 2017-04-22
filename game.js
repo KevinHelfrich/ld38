@@ -1,5 +1,5 @@
 window.onload = function() {
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 
     var map = [];
     var guy = {};
@@ -7,6 +7,9 @@ window.onload = function() {
     var keydownTracker = {};
     var tilemap = {};
     var layer = {};
+    var enemies = [];
+
+    var actionMade = false;
 
     var mapWidth = 128;
     var mapHeight = 128;
@@ -15,9 +18,12 @@ window.onload = function() {
     var tileWidth = 40;
     var guyOffset = 20;
 
+    var getEnemy = enemyGetter(game,tileWidth,guyOffset);
+
     function preload () {
         game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
+        game.load.image('zombie', 'zombie.png');
     }
 
     function create () {
@@ -38,6 +44,9 @@ window.onload = function() {
 
         var openSpaces = determineRoomSquares(map,mapWidth,mapHeight);
         guyPos = openSpaces[getRandomInt(0,openSpaces.length-1)];
+
+        getMapTile(guyPos).opened = true;
+        getMapTile(guyPos).navigable = false;
 
         var playArea = determineConnectedSquares(map,guyPos);
         console.log(playArea.length);
@@ -62,6 +71,8 @@ window.onload = function() {
         //move once on click
         if (cursors.left.isDown && !keydownTracker.left)
         {
+            actionMade = true;
+            getMapTile(guyPos).navigable = true;
             if(map[guyPos.y][guyPos.x-1].navigable){
                 guyPos.x -=1;
                 setGuyPos();
@@ -72,6 +83,8 @@ window.onload = function() {
         }
         else if (cursors.right.isDown && !keydownTracker.right)
         {
+            actionMade = true;
+            getMapTile(guyPos).navigable = true;
             if(map[guyPos.y][guyPos.x+1].navigable){
                 guyPos.x +=1;
                 setGuyPos();
@@ -83,6 +96,8 @@ window.onload = function() {
 
         if (cursors.up.isDown && !keydownTracker.up)
         {
+            actionMade = true;
+            getMapTile(guyPos).navigable = true;
             if(map[guyPos.y-1][guyPos.x].navigable){
                 guyPos.y -=1;
                 setGuyPos();
@@ -93,6 +108,8 @@ window.onload = function() {
         }
         else if (cursors.down.isDown && !keydownTracker.down)
         {
+            actionMade = true;
+            getMapTile(guyPos).navigable = true;
             if(map[guyPos.y+1][guyPos.x].navigable){
                 guyPos.y +=1;
                 setGuyPos();
@@ -101,6 +118,7 @@ window.onload = function() {
             }
             keydownTracker.down = true;
         }
+        getMapTile(guyPos).navigable = false;
 
         //reset key click trackers
         if (cursors.left.isUp)
@@ -118,6 +136,59 @@ window.onload = function() {
         if (cursors.down.isUp)
         {
             keydownTracker.down = false;
+        }
+
+        if(actionMade){
+            updateEnemies();
+            actionMade = false;
+        }
+    }
+
+    function updateEnemies(){
+        for(var i = 0; i < enemies.length;i++){
+            var enemy = enemies[i];
+
+            enemy.reaction--;
+
+            if(enemy.reaction<1)
+            {
+                enemy.reaction = enemy.baseReaction;
+            } else{
+                continue;
+            }
+
+            getMapTile(enemy.pos).navigable = true;
+            var xDif = guyPos.x - enemy.pos.x;
+            var yDif = guyPos.y - enemy.pos.y;
+
+            if(Math.abs(xDif)>Math.abs(yDif)){
+                if(xDif<0){
+                    var newSpot = getInDir(enemy.pos,0);
+                    if(getMapTile(newSpot).navigable){
+                        enemy.pos = newSpot;
+                    }
+                } else{
+                    var newSpot = getInDir(enemy.pos,2);
+                    if(getMapTile(newSpot).navigable){
+                        enemy.pos = newSpot;
+                    }
+                }
+            } else {
+                if(yDif<0){
+                    var newSpot = getInDir(enemy.pos,1);
+                    if(getMapTile(newSpot).navigable){
+                        enemy.pos = newSpot;
+                    }
+                } else{
+                    var newSpot = getInDir(enemy.pos,3);
+                    if(getMapTile(newSpot).navigable){
+                        enemy.pos = newSpot;
+                    }
+                }
+            }
+            getMapTile(enemy.pos).navigable = false;
+            getMapTile(enemy.pos).enemy = enemy;
+            setPos(enemy.sprite,enemy.pos);
         }
     }
 
@@ -138,6 +209,18 @@ window.onload = function() {
     function processRoom(pos){
         if(!hasRoomBeenOpened(map,pos)){
             console.log('new room');
+
+            unVisit(map,mapWidth,mapHeight);
+            var roomTiles = determineRoom(map,pos);
+
+            for(var i = 0; i<getRandomInt(2,4);i++){
+                var ith = getRandomInt(0,roomTiles.length-1);
+                var enemyPos = roomTiles[ith];
+                var enemy = getEnemy('zombie',enemyPos);
+                getMapTile(enemy.pos).enemy = enemy;
+                enemies.push(enemy);
+                getMapTile(enemyPos).navigable = false;
+            }
         }
         console.log('openedRoom');
     }
@@ -145,6 +228,11 @@ window.onload = function() {
     function setGuyPos(){
         guy.position.x = tileWidth*guyPos.x+guyOffset;
         guy.position.y = tileWidth*guyPos.y+guyOffset;
+    }
+
+    function setPos(sprite,pos){
+        sprite.position.x = tileWidth*pos.x+guyOffset;
+        sprite.position.y = tileWidth*pos.y+guyOffset;
     }
 
     function getMapTile(pos){
