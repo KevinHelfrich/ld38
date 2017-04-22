@@ -9,7 +9,9 @@
     <body>
         <div id="game" style="width:810px;display:inline-block"></div>
         <div style="display:inline-block;width:700px">
-            Player Health: <span data-bind="text: playerHealth"></span>
+            Player Health: <span data-bind="text: playerHealth"></span>/<span data-bind="text: playerMaxHealth"></span>
+            <br>
+            Enemy: <span data-bind="text: enemyName"></span>
             <br>
             Enemy Health: <span data-bind="text: enemyHealth"></span>
         </div>

@@ -1,6 +1,8 @@
 var kovm = {
     playerHealth : ko.observable(100),
-    enemyHealth : ko.observable()
+    enemyHealth : ko.observable(),
+    enemyName : ko.observable(),
+    playerMaxHealth : ko.observable(100)
 };
 
 

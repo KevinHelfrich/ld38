@@ -4,6 +4,10 @@ window.onload = function() {
     var map = [];
     var guy = {};
     var guyPos = {};
+    var player = {
+        health: 100,
+        maxHealth: 100
+    };
     var keydownTracker = {};
     var tilemap = {};
     var layer = {};
@@ -24,6 +28,7 @@ window.onload = function() {
         game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
         game.load.image('zombie', 'zombie.png');
+        game.load.image('ded', 'ded.png');
     }
 
     function create () {
@@ -68,7 +73,10 @@ window.onload = function() {
 
     function update() {
 
-        //move once on click
+        if(player.ded){
+            return;
+        }
+
         if (cursors.left.isDown && !keydownTracker.left)
         {
             actionMade = true;
@@ -142,6 +150,11 @@ window.onload = function() {
             updateEnemies();
             actionMade = false;
         }
+
+        if(player.health<=0 && !player.ded) {
+            player.ded = true;
+            game.add.sprite(game.camera.position.x,game.camera.position.y,'ded');
+        }
     }
 
     function updateEnemies(){
@@ -159,6 +172,14 @@ window.onload = function() {
                 enemy.reaction = enemy.baseReaction;
             } else{
                 continue;
+            }
+
+            for(var j = 0;j < 4; j++){
+                if(getInDir(enemy.pos,j).x === guyPos.x && getInDir(enemy.pos,j).y === guyPos.y){
+                    player.health -= enemy.damage;
+                    kovm.playerHealth(player.health);
+                    continue;
+                }
             }
 
             getMapTile(enemy.pos).navigable = true;
@@ -217,6 +238,7 @@ window.onload = function() {
                 tile.navigable = true;
             }
             kovm.enemyHealth(tile.enemy.health);
+            kovm.enemyName(tile.enemy.name);
         }
 
     }

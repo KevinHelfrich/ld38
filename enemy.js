@@ -9,7 +9,9 @@ function enemyGetter(game,tileWidth,guyOffset){
                 pos: enemyPos,
                 health: 100,
                 reaction: getRandomInt(0,3),
-                baseReaction: 3
+                baseReaction: 3,
+                name: 'zombie',
+                damage: 10
             };
             return enemy;
         }
