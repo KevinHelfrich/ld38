@@ -3,6 +3,7 @@ window.onload = function() {
 
     var map = [];
     var guy = {};
+    var guyPos = {};
     var keydownTracker = {};
     var tilemap = {};
     var layer = {};
@@ -11,9 +12,11 @@ window.onload = function() {
     var mapHeight = 128;
 
     var mapBuffer = 40;
+    var tileWidth = 4;
+    var guyOffset = 2;
 
     function preload () {
-        game.load.image('guy', 'guy.png');
+        game.load.image('guy', 'guy2.png');
         game.load.image('tiles', 'tiles.png');
     }
 
@@ -22,20 +25,24 @@ window.onload = function() {
         genMap(map,mapBuffer/2,mapBuffer/2,mapWidth,mapHeight);
 
         game.cache.addTilemap('dynamicMap', null, mapToCsv(map,mapWidth,mapHeight), Phaser.Tilemap.CSV);
-        tilemap = game.add.tilemap('dynamicMap', 4, 4);
+        tilemap = game.add.tilemap('dynamicMap', tileWidth, tileWidth);
 
-
-        tilemap.addTilesetImage('tiles', 'tiles', 4, 4);
+        tilemap.addTilesetImage('tiles', 'tiles', tileWidth, tileWidth);
 
         layer = tilemap.createLayer(0);
-        //tilemap.scale = {x:0.1,y:0.1};
 
         layer.resizeWorld();
 
-        guy = game.add.sprite(-60, 60, 'guy');
+        var openSpaces = determineRoomSquares(map,mapWidth,mapHeight);
+        guyPos = openSpaces[getRandomInt(0,openSpaces.length-1)];
+
+        var playArea = determineConnectedSquares(map,guyPos);
+        console.log(playArea.length);
+
+        guy = game.add.sprite(tileWidth*guyPos.x+guyOffset,tileWidth*guyPos.y+guyOffset, 'guy');
         guy.anchor.setTo(0.5, 0.5);
 
-        //game.camera.follow(guy);
+        game.camera.follow(guy);
 
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -52,23 +59,43 @@ window.onload = function() {
         //move once on click
         if (cursors.left.isDown && !keydownTracker.left)
         {
-            guy.position.x -= 40;
+            if(map[guyPos.y][guyPos.x-1].navigable){
+                guyPos.x -=1;
+                setGuyPos();
+            } else{
+                handleInteraction({x:guyPos.x-1,y:guyPos.y},0);
+            }
             keydownTracker.left = true;
         }
         else if (cursors.right.isDown && !keydownTracker.right)
         {
-            guy.position.x += 40;
+            if(map[guyPos.y][guyPos.x+1].navigable){
+                guyPos.x +=1;
+                setGuyPos();
+            } else{
+                handleInteraction({x:guyPos.x+1,y:guyPos.y},2);
+            }
             keydownTracker.right = true;
         }
 
         if (cursors.up.isDown && !keydownTracker.up)
         {
-            guy.position.y -=40;
+            if(map[guyPos.y-1][guyPos.x].navigable){
+                guyPos.y -=1;
+                setGuyPos();
+            } else{
+                handleInteraction({x:guyPos.x,y:guyPos.y-1},1);
+            }
             keydownTracker.up = true;
         }
         else if (cursors.down.isDown && !keydownTracker.down)
         {
-            guy.position.y +=40;
+            if(map[guyPos.y+1][guyPos.x].navigable){
+                guyPos.y +=1;
+                setGuyPos();
+            } else{
+                handleInteraction({x:guyPos.x,y:guyPos.y+1},3);
+            }
             keydownTracker.down = true;
         }
 
@@ -91,4 +118,28 @@ window.onload = function() {
         }
     }
 
+    function handleInteraction(pos,dir){
+        if(map[pos.y][pos.x].tile === '2'){
+            map[pos.y][pos.x].tile = '0';
+            map[pos.y][pos.x].navigable = true;
+            tilemap.fill(0, pos.x,pos.y,1,1);
+            var afterDoor = getInDir(pos,dir);
+            if(getMapTile(afterDoor).tile === '0'){
+                processRoom(afterDoor);
+            }
+        }
+    }
+
+    function processRoom(pos){
+        console.log('openedRoom');
+    }
+
+    function setGuyPos(){
+        guy.position.x = tileWidth*guyPos.x+guyOffset;
+        guy.position.y = tileWidth*guyPos.y+guyOffset;
+    }
+
+    function getMapTile(pos){
+        return map[pos.y][pos.x];
+    }
 };

@@ -153,18 +153,76 @@ function determineConnectedSquares(map,startPoint){
         squares.push(curr);
         map[curr.y][curr.x].visited = true;
 
-        if(!map[curr.y][curr.x-1].visited&&map[curr.y][curr.x-1].tile!=3){
-            toProcess.push({x:curr.x-1,y:curr.y});
-        }
-        if(!map[curr.y][curr.x+1].visited&&map[curr.y][curr.x+1].tile!=3){
-            toProcess.push({x:curr.x+1,y:curr.y});
-        }
-        if(!map[curr.y-1][curr.x].visited&&map[curr.y-1][curr.x].tile!=3){
-            toProcess.push({x:curr.x,y:curr.y-1});
-        }
-        if(!map[curr.y+1][curr.x].visited&&map[curr.y+1][curr.x].tile!=3){
-            toProcess.push({x:curr.x,y:curr.y+1});
-        }
+        try{
+            if(!map[curr.y][curr.x-1].visited&&map[curr.y][curr.x-1].tile!='3'){
+                toProcess.push({x:curr.x-1,y:curr.y});
+            }
+        }catch(err){}
+        try{
+            if(!map[curr.y][curr.x+1].visited&&map[curr.y][curr.x+1].tile!='3'){
+                toProcess.push({x:curr.x+1,y:curr.y});
+            }
+        }catch(err){}
+        try{
+            if(!map[curr.y-1][curr.x].visited&&map[curr.y-1][curr.x].tile!='3'){
+                toProcess.push({x:curr.x,y:curr.y-1});
+            }
+        }catch(err){}
+        try{
+            if(!map[curr.y+1][curr.x].visited&&map[curr.y+1][curr.x].tile!='3'){
+                toProcess.push({x:curr.x,y:curr.y+1});
+            }
+        }catch(err){}
     }
     return squares;
+}
+
+function determineRoom(map,startPoint){
+    if(map[startPoint.y][startPoint.x].tile !== '0'){
+        return [];
+    }
+    var squares = [];
+    var toProcess = [startPoint];
+    while(toProcess.length > 0){
+        var curr = toProcess.pop();
+        squares.push(curr);
+        map[curr.y][curr.x].visited = true;
+
+        try{
+            if(!map[curr.y][curr.x-1].visited&&map[curr.y][curr.x-1].tile==='0'){
+                toProcess.push({x:curr.x-1,y:curr.y});
+            }
+        }catch(err){}
+        try{
+            if(!map[curr.y][curr.x+1].visited&&map[curr.y][curr.x+1].tile==='0'){
+                toProcess.push({x:curr.x+1,y:curr.y});
+            }
+        }catch(err){}
+        try{
+            if(!map[curr.y-1][curr.x].visited&&map[curr.y-1][curr.x].tile==='0'){
+                toProcess.push({x:curr.x,y:curr.y-1});
+            }
+        }catch(err){}
+        try{
+            if(!map[curr.y+1][curr.x].visited&&map[curr.y+1][curr.x].tile==='0'){
+                toProcess.push({x:curr.x,y:curr.y+1});
+            }
+        }catch(err){}
+    }
+    return squares;
+}
+
+function getInDir(pos,dir){
+    if(dir === 0){
+        return {x:pos.x-1,y:pos.y};
+    }
+    if(dir === 1){
+        return {x:pos.x,y:pos.y-1};
+    }
+    if(dir === 2){
+        return {x:pos.x+1,y:pos.y};
+    }
+    if(dir === 3){
+        return {x:pos.x,y:pos.y+1};
+    }
 }
