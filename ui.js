@@ -1,6 +1,6 @@
 var kovm = {
-    player : {health: 100},
-    enemy : {health: 100}
+    playerHealth : ko.observable(100),
+    enemyHealth : ko.observable()
 };
 
 

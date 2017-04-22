@@ -150,6 +150,10 @@ window.onload = function() {
 
             enemy.reaction--;
 
+            if(enemy.health === 0){
+                continue;
+            }
+
             if(enemy.reaction<1)
             {
                 enemy.reaction = enemy.baseReaction;
@@ -194,6 +198,7 @@ window.onload = function() {
 
     function handleInteraction(pos,dir){
         unVisit(map,mapWidth,mapHeight);
+        var tile = getMapTile(pos);
         if(map[pos.y][pos.x].tile === '2'){
             map[pos.y][pos.x].tile = '0';
             map[pos.y][pos.x].navigable = true;
@@ -204,6 +209,16 @@ window.onload = function() {
                 getMapTile(afterDoor).opened = true;
             }
         }
+        else if(tile.enemy){
+            tile.enemy.health -=35;
+            if(tile.enemy.health<0){
+                tile.enemy.health = 0;
+                tile.enemy.sprite.destroy(true);
+                tile.navigable = true;
+            }
+            kovm.enemyHealth(tile.enemy.health);
+        }
+
     }
 
     function processRoom(pos){
