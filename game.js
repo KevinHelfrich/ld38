@@ -30,6 +30,8 @@ window.onload = function() {
     var getEnemy = enemyGetter(game,tileWidth,guyOffset);
     var getItem = itemGetter(game,tileWidth,guyOffset);
 
+    var frameCount = 0;
+
     function preload () {
         game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
@@ -84,6 +86,20 @@ window.onload = function() {
         if(player.ded){
             return;
         }
+        if(actionMade){
+            updateEnemies();
+            actionMade = false;
+        }
+
+        frameCount++;
+
+        if(frameCount>10){
+            frameCount = 0;
+            keydownTracker.left = false;
+            keydownTracker.right = false;
+            keydownTracker.up = false;
+            keydownTracker.down = false;
+        }
 
         if (cursors.left.isDown && !keydownTracker.left)
         {
@@ -109,8 +125,7 @@ window.onload = function() {
             }
             keydownTracker.right = true;
         }
-
-        if (cursors.up.isDown && !keydownTracker.up)
+        else if (cursors.up.isDown && !keydownTracker.up)
         {
             actionMade = true;
             getMapTile(guyPos).navigable = true;
@@ -152,10 +167,8 @@ window.onload = function() {
         {
             keydownTracker.down = false;
         }
-
-        if(actionMade){
-            updateEnemies();
-            actionMade = false;
+        if((cursors.left.isUp)&& (cursors.right.isUp)&& (cursors.up.isUp)&& (cursors.down.isUp)){
+            frameCount = 0;
         }
 
         if(player.health<=0 && !player.ded) {
