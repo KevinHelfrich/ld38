@@ -198,13 +198,17 @@ window.onload = function() {
             } else{
                 continue;
             }
-
+            var attacked = false;
             for(var j = 0;j < 4; j++){
                 if(getInDir(enemy.pos,j).x === guyPos.x && getInDir(enemy.pos,j).y === guyPos.y){
                     player.health -= enemy.damage;
                     kovm.playerHealth(player.health);
-                    continue;
+                    attacked = true;
                 }
+            }
+
+            if(attacked){
+                continue;
             }
 
             getMapTile(enemy.pos).navigable = true;

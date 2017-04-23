@@ -108,7 +108,45 @@ function enemyGetter(game,tileWidth,guyOffset){
                 nextDir: getRandomInt(0,3),
                 doubleMove: false
             };
+            enemy.updateFxn = function(map,playerPos){
+                if(enemy.doubleMove){
+                    var newSpot = getInDir(enemy.pos,enemy.nextDir);
+                    if(getMapTileFromMap(map,newSpot).navigable){
+                        enemy.pos = newSpot;
+                    }
+                    enemy.doubleMove = false;
+                    return;
+                }
+                enemy.nextDir++;
+                if(enemy.nextDir > 3){
+                    enemy.nextDir = 0;
+                }
+                var newSpot = getInDir(enemy.pos,enemy.nextDir);
+                if(getMapTileFromMap(map,newSpot).navigable){
+                    enemy.pos = newSpot;
+                }
 
+                var xDif = playerPos.x - enemy.pos.x;
+                var yDif = playerPos.y - enemy.pos.y;
+
+                if(enemy.nextDir === 0 && xDif < 0){
+                    enemy.doubleMove = true;
+                    enemy.reaction = 1;
+                }
+                if(enemy.nextDir === 2 && xDif > 0){
+                    enemy.doubleMove = true;
+                    enemy.reaction = 1;
+                }
+                if(enemy.nextDir === 1 && yDif < 0){
+                    enemy.doubleMove = true;
+                    enemy.reaction = 1;
+                }
+                if(enemy.nextDir === 3 && yDif > 0){
+                    enemy.doubleMove = true;
+                    enemy.reaction = 1;
+                }
+            }
+            return enemy;
         }
     }
 }
