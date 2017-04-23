@@ -10,7 +10,9 @@ window.onload = function() {
         weapon: {
             name: 'dagger',
             damage: 10
-        }
+        },
+        kills : 0,
+        lvl : 1
     };
     var keydownTracker = {};
     var tilemap = {};
@@ -29,6 +31,7 @@ window.onload = function() {
 
     var getEnemy = enemyGetter(game,tileWidth,guyOffset);
     var getItem = itemGetter(game,tileWidth,guyOffset);
+    var getRoom = roomGetter();
 
     var frameCount = 0;
 
@@ -36,6 +39,8 @@ window.onload = function() {
         game.load.image('guy', 'guy.png');
         game.load.image('tiles', 'tiles.png');
         game.load.image('zombie', 'zombie.png');
+        game.load.image('zombie2', 'zombie2.png');
+        game.load.image('skellyton', 'skellyton.png');
         game.load.image('ded', 'ded.png');
         game.load.image('dagger', 'dagger.png');
         game.load.image('sword', 'sword.png');
@@ -264,13 +269,19 @@ window.onload = function() {
             unVisit(map,mapWidth,mapHeight);
             var roomTiles = determineRoom(map,pos);
 
-            for(var i = 0; i<getRandomInt(2,4);i++){
-                var ith = getRandomInt(0,roomTiles.length-1);
-                var enemyPos = roomTiles[ith];
-                var enemy = getEnemy('zombie',enemyPos);
-                getMapTile(enemy.pos).enemy = enemy;
-                enemies.push(enemy);
-                getMapTile(enemyPos).navigable = false;
+            var spawnList = getRoom(player.lvl);
+
+            for(var k in spawnList){
+                if(spawnList.hasOwnProperty(k)){
+                    for(var i = 0; i<spawnList[k];i++){
+                        var ith = getRandomInt(0,roomTiles.length-1);
+                        var enemyPos = roomTiles[ith];
+                        var enemy = getEnemy(k,enemyPos);
+                        getMapTile(enemy.pos).enemy = enemy;
+                        enemies.push(enemy);
+                        getMapTile(enemyPos).navigable = false;
+                    }
+                }
             }
         }
         console.log('openedRoom');
