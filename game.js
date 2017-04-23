@@ -20,6 +20,9 @@ window.onload = function() {
     var enemies = [];
     var items = [];
 
+    var cursors = {};
+    var space = {};
+
     var actionMade = false;
 
     var mapWidth = 128;
@@ -79,11 +82,13 @@ window.onload = function() {
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
         cursors = game.input.keyboard.createCursorKeys();
+        space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
         keydownTracker.left = false;
         keydownTracker.right = false;
         keydownTracker.up = false;
         keydownTracker.down = false;
+        keydownTracker.space = false;
     }
 
     function update() {
@@ -104,6 +109,12 @@ window.onload = function() {
             keydownTracker.right = false;
             keydownTracker.up = false;
             keydownTracker.down = false;
+            keydownTracker.space = false;
+        }
+
+        if(space.isDown && !keydownTracker.space){
+            actionMade = true;
+            keydownTracker.space = true;
         }
 
         if (cursors.left.isDown && !keydownTracker.left)
@@ -172,7 +183,10 @@ window.onload = function() {
         {
             keydownTracker.down = false;
         }
-        if((cursors.left.isUp)&& (cursors.right.isUp)&& (cursors.up.isUp)&& (cursors.down.isUp)){
+        if(space.isUp){
+            keydownTracker.space = false;
+        }
+        if((cursors.left.isUp)&& (cursors.right.isUp)&& (cursors.up.isUp)&& (cursors.down.isUp)&&space.isUp){
             frameCount = 0;
         }
 
